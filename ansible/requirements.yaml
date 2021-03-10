@@ -1,0 +1,5 @@
+---
+  - src: https://github.com/olmax99/ansible-sftp
+    version: master
+    name: olmax99.sftp-server
+

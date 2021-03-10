@@ -1,0 +1,40 @@
+#
+# Ansible to provision sftp with s3fs on local host
+#
+- hosts: localhost
+  become: yes
+  become_method: sudo
+  gather_facts: no
+  pre_tasks: 
+    - name: Wait up to 15 seconds for EC2 bootstrap
+      wait_for_connection:
+        timeout: 15
+    # do NOT remove, used to define ansible_os_family, etc.
+    - name: Gather facts
+      setup:
+    # Use for dynamic variables that nned to be passed into all roles, i.e.
+    # - set_fact: 
+    #     foo_ncpu: "{{ ansible_processor_vcpus }}"
+  # similar to set_fact except they are static
+  vars:
+  roles:
+  # This work, on top of the base openvpn role, allows
+  # clients to forward all traffic through the VPN.
+  # https://openvpn.net/index.php/open-source/documentation/howto.html#redirect
+  tasks:
+    - name: Setup sftp server
+      include_role:
+        name: olmax99.sftp-server
+      # python -c 'import crypt; print crypt.crypt("super_secret", "$1$SomeSalt$")'
+      vars:
+        sftp_allow_passwords: True
+        sftp_nologin_shell: "/bin/rbash"
+        sftp_users:
+          - name: "user1"
+            password: "$1$blue$LFSATrq8pnitPt4/dI1bf/"
+            shell: False
+            sftp_directories: 
+              - "uploads/shared"
+        sftp_directories: 
+          - { name: public, mode: 755 }
+ 
